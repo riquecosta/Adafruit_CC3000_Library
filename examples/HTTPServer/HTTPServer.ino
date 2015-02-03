@@ -112,24 +112,7 @@ void setup(void)
     while(1);
   }
   
-  Serial.print(F("\nAttempting to connect to ")); Serial.println(WLAN_SSID);
-  if (!cc3000.connectToAP(WLAN_SSID, WLAN_PASS, WLAN_SECURITY)) {
-    Serial.println(F("Failed!"));
-    while(1);
-  }
-   
-  Serial.println(F("Connected!"));
-  
-  Serial.println(F("Request DHCP"));
-  while (!cc3000.checkDHCP())
-  {
-    delay(100); // ToDo: Insert a DHCP timeout!
-  }  
-
-  // Display the IP address DNS, Gateway, etc.
-  while (! displayConnectionDetails()) {
-    delay(1000);
-  }
+  tryConnect();
 
   // ******************************************************
   // You can safely remove this to save some flash memory!
@@ -148,6 +131,12 @@ void setup(void)
 
 void loop(void)
 {
+  //Check if the Wifi still connected
+  if (!cc3000.checkConnected()){
+    Serial.println("The Wifi was disconnected, try to connect again...");
+    tryConnect();
+  }
+  
   // Try to get a client which is connected.
   Adafruit_CC3000_ClientRef client = httpServer.available();
   if (client) {
@@ -266,4 +255,26 @@ bool displayConnectionDetails(void)
     Serial.println();
     return true;
   }
+}
+
+void tryConnect(void){
+  Serial.print(F("\nAttempting to connect to ")); Serial.println(WLAN_SSID);
+  if (!cc3000.connectToAP(WLAN_SSID, WLAN_PASS, WLAN_SECURITY)) {
+    Serial.println(F("Failed!"));
+    while(1);
+  }
+   
+  Serial.println(F("Connected!"));
+  
+  Serial.println(F("Request DHCP"));
+  while (!cc3000.checkDHCP())
+  {
+    delay(100); // ToDo: Insert a DHCP timeout!
+  }  
+
+  // Display the IP address DNS, Gateway, etc.
+  while (! displayConnectionDetails()) {
+    delay(1000);
+  }
+}
 }
